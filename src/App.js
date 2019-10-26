@@ -1,68 +1,39 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import useEventListener from "@use-it/event-listener";
-import {
-  getAllSquares,
-  getCellDistance,
-  getNeighbor,
-  cellToId
-} from "./lib/grid/math";
+import { getAllSquares, getNeighbor } from "./lib/grid/math";
 
 import "./App.css";
 
-const TILE_SIZE = 20;
-const CELL_WIDTH = TILE_SIZE;
-const CELL_HEIGHT = TILE_SIZE;
-const COLUMNS = 60;
-const ROWS = 40;
-const MAP_HEIGHT = CELL_HEIGHT * ROWS;
-const MAP_WIDTH = CELL_WIDTH * COLUMNS;
+import {
+  COLUMNS,
+  ROWS,
+  MAP_HEIGHT,
+  MAP_WIDTH
+} from "./constants/game.constants";
+
+import { drawMap, drawPlayer, getInitialCtx } from "./lib/canvas";
+
 const CELLS = getAllSquares({ col: 0, row: 0 }, { col: COLUMNS, row: ROWS });
 const CELL_IDS = Object.keys(CELLS);
 const PLAYER = {
   loc: { col: 2, row: 2 }
 };
 
+let ctx;
+
+const renderGame = ctx => {
+  ctx.clearRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
+  drawMap(ctx, CELL_IDS, CELLS, PLAYER);
+  drawPlayer(ctx, PLAYER);
+};
+
 export default function App() {
-  useEffect(() => {
-    draw();
-  });
   const canvasRef = useRef(null);
 
-  const draw = () => {
-    const ctx = canvasRef.current.getContext("2d");
-
-    ctx.clearRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
-
-    ctx.textBaseline = "top";
-
-    CELL_IDS.forEach(cellId => {
-      const cell = CELLS[cellId];
-
-      const opacity =
-        ((getCellDistance(cellToId(PLAYER.loc), cellId) - 5) * -1) / 10;
-
-      ctx.fillStyle = `rgb(200,0,0,${opacity})`;
-      ctx.fillRect(
-        cell.col * CELL_WIDTH,
-        cell.row * CELL_HEIGHT,
-        CELL_WIDTH,
-        CELL_HEIGHT
-      );
-
-      ctx.fillStyle = `rgb(255,255,255, .5)`;
-      ctx.font = "8px serif";
-      ctx.fillText(cellId, cell.col * CELL_WIDTH, cell.row * CELL_HEIGHT);
-    });
-
-    ctx.fillStyle = `rgb(255,255,255,1)`;
-    ctx.font = `${TILE_SIZE}px serif`;
-    ctx.fillText(
-      "@",
-      PLAYER.loc.col * CELL_WIDTH,
-      PLAYER.loc.row * CELL_HEIGHT,
-      CELL_WIDTH
-    );
-  };
+  useEffect(() => {
+    ctx = getInitialCtx(canvasRef);
+    renderGame(ctx);
+  });
 
   const movePlayer = dir => {
     const newLoc = getNeighbor(PLAYER.loc, dir);
@@ -73,7 +44,7 @@ export default function App() {
 
     PLAYER.loc = newLoc;
 
-    draw();
+    renderGame(ctx);
   };
 
   const handleKeyDown = ({ key }) => {
