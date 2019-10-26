@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import useEventListener from "@use-it/event-listener";
-import { getAllSquares, getNeighbor } from "./lib/grid/math";
+import { cellToId, getAllSquares, getNeighbor } from "./lib/grid/math";
+import { observeBoundaries } from "./lib/canvas";
+import _ from "lodash";
 
 import "./App.css";
 
@@ -11,12 +13,23 @@ import {
   MAP_WIDTH
 } from "./constants/game.constants";
 
-import { drawMap, drawPlayer, getInitialCtx } from "./lib/canvas";
+import {
+  drawMap,
+  drawPlayer,
+  getInitialCtx,
+  drunkardsWalk
+} from "./lib/canvas";
 
-const CELLS = getAllSquares({ col: 0, row: 0 }, { col: COLUMNS, row: ROWS });
+const CELLS = getAllSquares(
+  { col: 0, row: 0, open: false },
+  { col: COLUMNS, row: ROWS }
+);
 const CELL_IDS = Object.keys(CELLS);
+
+_.times(30, () => drunkardsWalk(CELL_IDS, CELLS));
+
 const PLAYER = {
-  loc: { col: 2, row: 2 }
+  loc: _.find(CELLS, cell => cell.open)
 };
 
 let ctx;
@@ -37,10 +50,9 @@ export default function App() {
 
   const movePlayer = dir => {
     const newLoc = getNeighbor(PLAYER.loc, dir);
-    if (newLoc.col < 0) return;
-    if (newLoc.col === COLUMNS) return;
-    if (newLoc.row < 0) return;
-    if (newLoc.row === ROWS) return;
+    const newLocId = cellToId(newLoc);
+    if (!observeBoundaries(newLocId)) return;
+    if (!CELLS[newLocId].open) return;
 
     PLAYER.loc = newLoc;
 
