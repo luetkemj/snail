@@ -1,5 +1,13 @@
 import { each, keyBy, map, orderBy, uniq } from "lodash";
 
+export const getCellDistance = (cellId1, cellId2) => {
+  const cell1 = idToCell(cellId1);
+  const cell2 = idToCell(cellId2);
+  const x = Math.pow(cell2.col - cell1.col, 2);
+  const y = Math.pow(cell2.row - cell1.row, 2);
+  return Math.floor(Math.sqrt(x + y));
+};
+
 // 00, 10, 20
 // 01, 11, 21
 // 02, 12, 22
@@ -59,9 +67,9 @@ export const bottomRight = (s1, s2) => {
   };
 };
 
-export const squareToId = s => `${s.col},${s.row}`;
+export const cellToId = cell => `${cell.col},${cell.row}`;
 
-export const idToSquare = id => {
+export const idToCell = id => {
   const coords = id.split(",");
   return { col: parseInt(coords[0], 10), row: parseInt(coords[1], 10) };
 };
@@ -80,7 +88,7 @@ export const getRow = (s1, s2) => {
     col = col + 1;
   }
 
-  return keyBy(row, squareToId);
+  return keyBy(row, cellToId);
 };
 
 // Given two squares on a grid
@@ -97,7 +105,7 @@ export const getColumn = (s1, s2) => {
     row = row + 1;
   }
 
-  return keyBy(column, squareToId);
+  return keyBy(column, cellToId);
 };
 
 // given two squares on a grid, returns all squares within their rectangle
@@ -115,7 +123,7 @@ export const getAllSquares = (s1, s2) => {
 
   each(column, s => (squares = { ...squares, ...getRow(s, brsq) }));
 
-  return keyBy(squares, squareToId);
+  return keyBy(squares, cellToId);
 };
 
 export const getMaxColumn = squares => {
@@ -155,11 +163,11 @@ export const getBoundingCorners = squares => ({
 export const getUnselectedSquaresInBoundingBox = squares => {
   const corners = getBoundingCorners(squares);
 
-  const allSquareIds = map(squares, squareToId);
+  const allSquareIds = map(squares, cellToId);
 
   const allSquaresInBoundingBox = getAllSquares(
-    idToSquare(corners.topLeft),
-    idToSquare(corners.bottomRight)
+    idToCell(corners.topLeft),
+    idToCell(corners.bottomRight)
   );
 
   const rows = getRowsInCollection(allSquaresInBoundingBox);
@@ -172,10 +180,10 @@ export const getUnselectedSquaresInBoundingBox = squares => {
   each(rows, r => {
     const idsInRow = map(
       getRow(
-        { col: idToSquare(corners.topLeft).col, row: r },
-        idToSquare(corners.bottomRight)
+        { col: idToCell(corners.topLeft).col, row: r },
+        idToCell(corners.bottomRight)
       ),
-      squareToId
+      cellToId
     );
 
     unselected.rows[r] = [];
