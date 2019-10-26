@@ -125,3 +125,27 @@ export const drunkardsWalk = (cellIds, cells) => {
 
   return cells;
 };
+
+export const drunkardsWalk2 = (cellIds, cells) => {
+  const dig = cell => (cell.open = true);
+  const directions = ["N", "E", "S", "W"];
+
+  // Pick a random point on a filled grid and mark it empty.
+  let current = _.sample(cellIds);
+  dig(cells[current]);
+
+  const digger = () => {
+    // get the next cell Id
+    const nextCellId = cellToId(
+      getNeighbor(cells[current], _.sample(directions))
+    );
+
+    // test that it is in bounds
+    if (observeBoundaries(nextCellId)) {
+      dig(cells[nextCellId]);
+      current = nextCellId;
+    }
+  };
+
+  _.times(1500, digger);
+};

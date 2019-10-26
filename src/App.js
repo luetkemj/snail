@@ -17,7 +17,8 @@ import {
   drawMap,
   drawPlayer,
   getInitialCtx,
-  drunkardsWalk
+  drunkardsWalk,
+  drunkardsWalk2
 } from "./lib/canvas";
 
 const CELLS = getAllSquares(
@@ -27,6 +28,7 @@ const CELLS = getAllSquares(
 const CELL_IDS = Object.keys(CELLS);
 
 _.times(30, () => drunkardsWalk(CELL_IDS, CELLS));
+// drunkardsWalk2(CELL_IDS, CELLS);
 
 const PLAYER = {
   loc: _.find(CELLS, cell => cell.open)
