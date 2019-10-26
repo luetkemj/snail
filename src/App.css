@@ -4,15 +4,3 @@
   min-height: 100vh;
   min-width: 100vw;
 }
-
-.world {
-  position: relative;
-  font-size: 6px;
-  color: white;
-}
-
-.cell {
-  position: absolute;
-  border: 1px solid #282c34;
-  background: greenyellow;
-}

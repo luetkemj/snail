@@ -1,45 +1,54 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { getAllSquares, getCellDistance } from "./lib/grid/math";
+import { random } from "lodash";
+
 import "./App.css";
 
-import { getAllSquares, getCellDistance } from "./lib/grid/math";
-const TILE_SIZE = 25;
+const TILE_SIZE = 10;
 const CELL_WIDTH = TILE_SIZE;
 const CELL_HEIGHT = TILE_SIZE;
-const CELLS = getAllSquares({ col: 0, row: 0 }, { col: 20, row: 20 });
+const COLUMNS = 60;
+const ROWS = 40;
+const MAP_HEIGHT = CELL_HEIGHT * ROWS;
+const MAP_WIDTH = CELL_WIDTH * COLUMNS;
+const CELLS = getAllSquares({ col: 0, row: 0 }, { col: COLUMNS, row: ROWS });
 const CELL_IDS = Object.keys(CELLS);
 
-const handleClick = cell => {
-  console.log(cell);
-};
+export default function App() {
+  useEffect(() => {
+    draw();
+  });
+  const canvasRef = useRef(null);
 
-const getOpacity = (cellId, darkness) => {
-  const opacity = ((getCellDistance("1,1", cellId) - darkness) * -1) / 10;
-  return opacity <= 0 ? 0 : opacity;
-};
+  const draw = () => {
+    const ctx = canvasRef.current.getContext("2d");
+    ctx.clearRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
 
-const Cell = ({ cell }) => (
-  <div
-    className="cell"
-    style={{
-      width: CELL_WIDTH,
-      height: CELL_HEIGHT,
-      transform: `translate(${cell.col * CELL_WIDTH}px, ${cell.row *
-        CELL_HEIGHT}px)`,
-      opacity: cell.opacity
-    }}
-    onClick={e => handleClick(cell, e)}
-  />
-);
+    CELL_IDS.forEach(cellId => {
+      const cell = CELLS[cellId];
+      ctx.fillStyle = `rgb(200,0,0,${cell.opacity})`;
+      ctx.fillRect(
+        cell.col * CELL_WIDTH,
+        cell.row * CELL_HEIGHT,
+        CELL_WIDTH,
+        CELL_HEIGHT
+      );
+    });
+  };
 
-function App() {
   const [darkness, setDarkness] = useState(5);
+
+  const getOpacity = (cellId, darkness) => {
+    const opacity = ((getCellDistance("1,1", cellId) - darkness) * -1) / 10;
+    return opacity <= 0 ? 0 : opacity;
+  };
 
   return (
     <div className="App">
       <input
         type="range"
         min="0"
-        max="20"
+        max="100"
         value={darkness}
         step="1"
         onChange={e => {
@@ -47,17 +56,17 @@ function App() {
           CELL_IDS.forEach(cellId => {
             CELLS[cellId].opacity = getOpacity(cellId, darkness);
           });
-
+          draw();
           return setDarkness(darkness);
         }}
       />
-      <div className="world">
-        {CELL_IDS.map(cellId => (
-          <Cell key={cellId} cell={CELLS[cellId]} />
-        ))}
-      </div>
+      <canvas
+        width={MAP_WIDTH}
+        height={MAP_HEIGHT}
+        className="canvas"
+        ref={canvasRef}
+        onClick={e => console.log(e.clientX)}
+      />
     </div>
   );
 }
-
-export default App;
