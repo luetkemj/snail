@@ -4,3 +4,7 @@
   min-height: 100vh;
   min-width: 100vw;
 }
+
+.canvas {
+  border: 1px solid #fff;
+}
