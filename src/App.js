@@ -18,7 +18,8 @@ import {
   drawPlayer,
   getInitialCtx,
   drunkardsWalk,
-  drunkardsWalk2
+  drunkardsWalk2,
+  categorizeCells
 } from "./lib/canvas";
 
 let CELLS = getAllSquares(
@@ -28,6 +29,8 @@ let CELLS = getAllSquares(
 const CELL_IDS = Object.keys(CELLS);
 
 drunkardsWalk2(CELL_IDS, CELLS);
+
+categorizeCells(CELL_IDS, CELLS);
 
 let PLAYER = {
   loc: _.find(CELLS, cell => cell.open)
@@ -45,10 +48,10 @@ const renderGame = ctx => {
 export default function App() {
   const canvasRef = useRef(null);
   const [settings, setSettings] = useState({
-    algorithm: "dw2",
-    iterations: 1,
+    algorithm: "dw",
+    iterations: 30,
     startingLocation: "30,20",
-    randomStartingLocation: false
+    randomStartingLocation: "on"
   });
 
   const rebuild = () => {
@@ -95,6 +98,8 @@ export default function App() {
     if (!CELLS[newLocId].open) return;
 
     PLAYER.loc = newLoc;
+
+    console.log(PLAYER.loc);
 
     renderGame(ctx);
   };

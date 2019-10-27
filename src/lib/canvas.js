@@ -2,11 +2,15 @@ import _ from "lodash";
 
 import {
   // getAllSquares,
+  getBoundary,
   getCellDistance,
   getNeighbor,
   cellToId,
   idToCell,
-  getAllSquaresFromPoint
+  idToPoint,
+  pointToId,
+  getAllSquaresFromPoint,
+  line
 } from "./grid/math";
 
 import {
@@ -47,11 +51,43 @@ export const drawPlayer = (ctx, player) => {
 };
 
 export const drawPlayerHalo = (ctx, player, cellIds, cells) => {
-  const localCellIds = Object.keys(getAllSquaresFromPoint(player.loc, 8));
+  const localCells = getAllSquaresFromPoint(player.loc, 8);
+  const localCellIds = Object.keys(localCells);
+  const localBoundaryCellIds = getBoundary(localCellIds);
+  const litCellIds = [];
+
+  // console.log(localBoundaryCellIds);
+  console.log(player.loc);
+
+  localBoundaryCellIds.forEach(id => {
+    const start = { x: player.loc.col, y: player.loc.row };
+    const end = idToPoint(id);
+    const theLine = line(start, end);
+    // console.log({ start, end, theLine, player });
+
+    // iterate over theLine!!
+    _.each(theLine, point => {
+      const cellId = pointToId(point);
+      const cell = cells[cellId];
+      // console.log({ theLine, point, cellId, cell });
+
+      if (cell && cell.type && cell.type === "floor") {
+        litCellIds.push(cellId);
+      } else {
+        return false;
+      }
+    });
+    // from start if it's floor light
+    // it it's wall bail on all other cells
+    // cells[pointToId()]
+  });
+
+  // console.log(litCellIds);
+
   // from player location build halo of cell ids
   // get distance on all cells in halo
   // if they are open render light
-  localCellIds.forEach(cellId => {
+  _.uniq(litCellIds).forEach(cellId => {
     const cell = cells[cellId];
     if (cell && cell.open) {
       const opacity =
@@ -71,11 +107,12 @@ export const drawPlayerHalo = (ctx, player, cellIds, cells) => {
 // cells { id: {col: 0, row: 0} }
 // player { loc: {col: 0, row: 0} }
 // debug boolean
-export const drawMap = (ctx, cellIds, cells, player, debug) => {
+export const drawMap = (ctx, cellIds, cells, player, debug = false) => {
   cellIds.forEach(cellId => {
     const cell = cells[cellId];
 
-    ctx.fillStyle = cell.open ? `rgb(10,10,10)` : `rgb(100,100,100)`;
+    // ctx.fillStyle = cell.open ? `rgb(10,10,10)` : `rgb(100,100,100)`;
+    ctx.fillStyle = cell.open ? `rgb(10,10,10)` : `rgb(10,10,10)`;
     ctx.fillRect(
       cell.col * CELL_WIDTH,
       cell.row * CELL_HEIGHT,
@@ -83,8 +120,21 @@ export const drawMap = (ctx, cellIds, cells, player, debug) => {
       CELL_HEIGHT
     );
 
+    // testing
+    // if (cell.type === "floor") {
+    //   ctx.fillStyle = `rgb(255,255,255, 1)`;
+    //   ctx.font = `${TILE_SIZE}px serif`;
+    //   ctx.fillText("☐", cell.col * CELL_WIDTH, cell.row * CELL_HEIGHT);
+    // }
+
+    // if (cell.type === "wall") {
+    //   ctx.fillStyle = `rgb(255,255,255, 1)`;
+    //   ctx.font = `${TILE_SIZE}px serif`;
+    //   ctx.fillText("☰", cell.col * CELL_WIDTH, cell.row * CELL_HEIGHT);
+    // }
+
     if (debug) {
-      ctx.fillStyle = `rgb(255,255,255, .5)`;
+      ctx.fillStyle = `rgb(200,0,0, 1)`;
       ctx.font = "8px serif";
       ctx.fillText(cellId, cell.col * CELL_WIDTH, cell.row * CELL_HEIGHT);
     }
@@ -145,4 +195,54 @@ export const drunkardsWalk2 = (cellIds, cells, randomStart = false) => {
   };
 
   _.times(1500, digger);
+};
+
+export const isWall = (CELLS, cellId) => {
+  const point = idToPoint(cellId);
+  const neighbors = [
+    `${point.x},${point.y - 1}`, // N
+    `${point.x + 1},${point.y}`, // E
+    `${point.x},${point.y + 1}`, // S
+    `${point.x - 1},${point.y}` // W
+  ];
+
+  const floors = [];
+  neighbors.forEach(id => {
+    const cell = CELLS[id];
+    if (cell && cell.type === "floor") {
+      floors.push(id);
+    }
+  });
+
+  if (floors.length > 0) {
+    return true;
+  }
+
+  return false;
+};
+
+export const categorizeCells = (CELL_IDS, CELLS) => {
+  const FLOOR_CELL_IDS = [];
+  const WALL_CELL_IDS = [];
+  const ROCK_CELL_IDS = [];
+
+  // mark floors
+  CELL_IDS.forEach(id => {
+    const cell = CELLS[id];
+    if (cell.open) {
+      cell.type = "floor";
+      FLOOR_CELL_IDS.push(id);
+      return;
+    }
+  });
+
+  CELL_IDS.forEach(id => {
+    const cell = CELLS[id];
+    if (!cell.type && isWall(CELLS, id)) {
+      // console.log("WALL!");
+      cell.type = "wall";
+      WALL_CELL_IDS.push(id);
+      return;
+    }
+  });
 };

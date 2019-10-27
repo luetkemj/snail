@@ -68,10 +68,16 @@ export const bottomRight = (s1, s2) => {
 };
 
 export const cellToId = cell => `${cell.col},${cell.row}`;
+export const pointToId = point => `${point.x},${point.y}`;
 
 export const idToCell = id => {
   const coords = id.split(",");
   return { col: parseInt(coords[0], 10), row: parseInt(coords[1], 10) };
+};
+
+export const idToPoint = id => {
+  const coords = id.split(",");
+  return { x: parseInt(coords[0], 10), y: parseInt(coords[1], 10) };
 };
 
 // Given two squares on a grid
@@ -148,17 +154,6 @@ export const getMinRow = squares => {
   return Math.min(...map(squares, s => s.row));
 };
 
-// given a collection of squares on a grid return the rows with at least one square
-export const getRowsInCollection = squares => {
-  return orderBy(uniq(map(squares, s => s.row)));
-};
-
-// given a collection of squares on a grid return the columns with at least one square
-export const getColumnsInCollection = squares => {
-  return orderBy(uniq(map(squares, s => s.col)));
-};
-
-// get boundingCorners from a collection
 export const getBoundingCorners = squares => ({
   topLeft: `${getMinColumn(squares)},${getMinRow(squares)}`,
   topRight: `${getMaxColumn(squares)},${getMinRow(squares)}`,
@@ -166,43 +161,24 @@ export const getBoundingCorners = squares => ({
   bottomLeft: `${getMinColumn(squares)},${getMaxRow(squares)}`
 });
 
-export const getUnselectedSquaresInBoundingBox = squares => {
+export const getBoundary = ids => {
+  const squares = ids.map(idToCell);
   const corners = getBoundingCorners(squares);
-
-  const allSquareIds = map(squares, cellToId);
-
-  const allSquaresInBoundingBox = getAllSquares(
-    idToCell(corners.topLeft),
-    idToCell(corners.bottomRight)
-  );
-
-  const rows = getRowsInCollection(allSquaresInBoundingBox);
-
-  const unselected = {
-    all: [],
-    rows: {}
-  };
-
-  each(rows, r => {
-    const idsInRow = map(
-      getRow(
-        { col: idToCell(corners.topLeft).col, row: r },
-        idToCell(corners.bottomRight)
-      ),
-      cellToId
-    );
-
-    unselected.rows[r] = [];
-
-    each(idsInRow, sId => {
-      if (!allSquareIds.includes(sId)) {
-        unselected.all.push(sId);
-        unselected.rows[r].push(sId);
-      }
-    });
-  });
-
-  return unselected;
+  const boundarySquares = [
+    ...Object.keys(
+      getRow(idToCell(corners.topLeft), idToCell(corners.topRight))
+    ),
+    ...Object.keys(
+      getRow(idToCell(corners.bottomLeft), idToCell(corners.bottomRight))
+    ),
+    ...Object.keys(
+      getColumn(idToCell(corners.bottomLeft), idToCell(corners.topLeft))
+    ),
+    ...Object.keys(
+      getColumn(idToCell(corners.bottomRight), idToCell(corners.topRight))
+    )
+  ];
+  return uniq(boundarySquares);
 };
 
 export const getPoint = (x, y) => ({ x, y });
