@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import useEventListener from "@use-it/event-listener";
 import { cellToId, getAllSquares, getNeighbor } from "./lib/grid/math";
-import { observeBoundaries } from "./lib/canvas";
+import { observeBoundaries, drawPlayerHalo } from "./lib/canvas";
 import _ from "lodash";
 
 import "./App.css";
@@ -40,6 +40,7 @@ let ctx;
 const renderGame = ctx => {
   ctx.clearRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
   drawMap(ctx, CELL_IDS, CELLS, PLAYER);
+  drawPlayerHalo(ctx, PLAYER, CELL_IDS, CELLS);
   drawPlayer(ctx, PLAYER);
 };
 

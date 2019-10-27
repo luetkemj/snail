@@ -45,14 +45,25 @@ export const drawPlayer = (ctx, player) => {
   );
 };
 
-export const drawPlayerHalo = (ctx, player) => {
+export const drawPlayerHalo = (ctx, player, cellIds, cells) => {
   // lighting halo (do elsewhere)
   // from player location build halo of cell ids
   // get distance on all cells in halo
   // if they are open render light
-  // const opacity =
-  //   ((getCellDistance(cellToId(player.loc), cellId) - 5) * -1) / 10;
-  // ctx.fillStyle = `rgb(200,0,0,${opacity})`;
+  cellIds.forEach(cellId => {
+    const cell = cells[cellId];
+    if (cell.open) {
+      const opacity =
+        ((getCellDistance(cellToId(player.loc), cellId) - 5) * -1) / 7;
+      ctx.fillStyle = `rgb(85,65,13,${opacity})`;
+      ctx.fillRect(
+        cell.col * CELL_WIDTH,
+        cell.row * CELL_HEIGHT,
+        CELL_WIDTH,
+        CELL_HEIGHT
+      );
+    }
+  });
 };
 
 // cellIds ['id', ...]
