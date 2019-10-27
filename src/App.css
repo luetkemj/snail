@@ -8,3 +8,18 @@
 .canvas {
   border: 1px solid #fff;
 }
+
+.settings {
+  color: #ccc;
+  padding: 32px;
+}
+
+.settings label {
+  display: inline-block;
+  padding: 0 8px 0 32px;
+}
+
+.settings button {
+  display: inline-block;
+  margin: 0 0 0 32px;
+}

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import useEventListener from "@use-it/event-listener";
 import { cellToId, getAllSquares, getNeighbor } from "./lib/grid/math";
 import { observeBoundaries } from "./lib/canvas";
@@ -21,16 +21,17 @@ import {
   drunkardsWalk2
 } from "./lib/canvas";
 
-const CELLS = getAllSquares(
+let CELLS = getAllSquares(
   { col: 0, row: 0, open: false },
   { col: COLUMNS, row: ROWS }
 );
 const CELL_IDS = Object.keys(CELLS);
 
-_.times(30, () => drunkardsWalk(CELL_IDS, CELLS));
-// drunkardsWalk2(CELL_IDS, CELLS);
+// _.times(30, () => drunkardsWalk(CELL_IDS, CELLS, true));
+// drunkardsWalk(CELL_IDS, CELLS);
+drunkardsWalk2(CELL_IDS, CELLS);
 
-const PLAYER = {
+let PLAYER = {
   loc: _.find(CELLS, cell => cell.open)
 };
 
@@ -44,6 +45,44 @@ const renderGame = ctx => {
 
 export default function App() {
   const canvasRef = useRef(null);
+  const [settings, setSettings] = useState({
+    algorithm: "dw2",
+    iterations: 1,
+    startingLocation: "30,20",
+    randomStartingLocation: false
+  });
+
+  const rebuild = () => {
+    CELLS = getAllSquares(
+      { col: 0, row: 0, open: false },
+      { col: COLUMNS, row: ROWS }
+    );
+
+    const algorithms = {
+      dw: drunkardsWalk,
+      dw2: drunkardsWalk2
+    };
+
+    _.times(settings.iterations, () =>
+      algorithms[settings.algorithm](
+        CELL_IDS,
+        CELLS,
+        settings.randomStartingLocation === "on"
+      )
+    );
+
+    PLAYER = {
+      loc: _.find(CELLS, cell => cell.open)
+    };
+
+    renderGame(ctx);
+  };
+
+  const handleSettingChange = (path, value) => {
+    const newSettings = { ...settings };
+    newSettings[path] = value;
+    setSettings(newSettings);
+  };
 
   useEffect(() => {
     ctx = getInitialCtx(canvasRef);
@@ -89,6 +128,53 @@ export default function App() {
 
   return (
     <div className="App">
+      <div className="settings">
+        SETTINGS:
+        <label htmlFor="Algorithm">Algorithm:</label>
+        <select
+          name="Algorithm"
+          value={settings.algorithm}
+          onChange={e => {
+            handleSettingChange("algorithm", e.target.value);
+          }}
+        >
+          <option value="dw">Drunkards Walk</option>
+          <option value="dw2">Drunkards Walk 2</option>
+        </select>
+        <label htmlFor="iterations">Iterations:</label>
+        <input
+          name="iterations"
+          type="number"
+          min="1"
+          max="1000"
+          value={settings.iterations}
+          onChange={e => {
+            handleSettingChange("iterations", e.target.value);
+          }}
+        />
+        {/* <label htmlFor="startLocation">Starting Location:</label>
+        <input
+          type="text"
+          name="startLocation"
+          value={settings.startingLocation}
+          onChange={e => {
+            handleSettingChange("startingLocation", e.target.value);
+          }}
+        /> */}
+        <label htmlFor="randomStart">Random Starting Location</label>
+        <input
+          type="checkbox"
+          name="randomStart"
+          checked={settings.randomStartingLocation}
+          onChange={e => {
+            handleSettingChange(
+              "randomStartingLocation",
+              settings.randomStartingLocation === "on" ? "" : "on"
+            );
+          }}
+        />
+        <button onClick={rebuild}>Rebuild Map</button>
+      </div>
       <canvas
         width={MAP_WIDTH}
         height={MAP_HEIGHT}

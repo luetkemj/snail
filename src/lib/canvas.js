@@ -79,21 +79,18 @@ export const drawMap = (ctx, cellIds, cells, player, debug) => {
   });
 };
 
-export const drunkardsWalk = (cellIds, cells) => {
+export const drunkardsWalk = (cellIds, cells, randomStart = false) => {
   const dig = cell => (cell.open = true);
   const directions = ["N", "E", "S", "W"];
 
-  let backstop = 0;
+  // Pick start location
+  let current = randomStart
+    ? _.sample(cellIds)
+    : `${Math.ceil(COLUMNS / 2)},${Math.ceil(ROWS / 2)}`;
 
-  // Pick a random point on a filled grid and mark it empty.
-  let current = _.sample(cellIds);
   dig(cells[current]);
 
-  const digger = turns => {
-    // no turns left. stop!
-    if (!turns) return;
-    if (backstop > 400) return;
-
+  const digger = () => {
     // get the next cell Id
     const nextCellId = cellToId(
       getNeighbor(cells[current], _.sample(directions))
@@ -103,35 +100,23 @@ export const drunkardsWalk = (cellIds, cells) => {
     if (observeBoundaries(nextCellId)) {
       if (!cells[nextCellId].open) {
         dig(cells[nextCellId]);
-        turns = turns - 1;
         current = nextCellId;
-        backstop = 0;
-        digger(turns);
-      } else {
-        backstop++;
-        digger(turns);
       }
-    } else {
-      backstop++;
-      digger(turns);
     }
   };
 
-  digger(400);
-  // Choose a random cardinal direction (N, E, S, W).
-
-  // Move in that direction, and mark it empty unless it already was.
-  // Repeat steps 2-3, until you have emptied as many grids as desired.
-
-  return cells;
+  _.times(2500, digger);
 };
 
-export const drunkardsWalk2 = (cellIds, cells) => {
+export const drunkardsWalk2 = (cellIds, cells, randomStart = false) => {
   const dig = cell => (cell.open = true);
   const directions = ["N", "E", "S", "W"];
 
-  // Pick a random point on a filled grid and mark it empty.
-  let current = _.sample(cellIds);
+  // Pick start location
+  let current = randomStart
+    ? _.sample(cellIds)
+    : `${Math.ceil(COLUMNS / 2)},${Math.ceil(ROWS / 2)}`;
+
   dig(cells[current]);
 
   const digger = () => {
