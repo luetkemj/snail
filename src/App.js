@@ -27,8 +27,6 @@ let CELLS = getAllSquares(
 );
 const CELL_IDS = Object.keys(CELLS);
 
-// _.times(30, () => drunkardsWalk(CELL_IDS, CELLS, true));
-// drunkardsWalk(CELL_IDS, CELLS);
 drunkardsWalk2(CELL_IDS, CELLS);
 
 let PLAYER = {

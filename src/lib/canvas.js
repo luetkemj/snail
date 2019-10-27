@@ -5,7 +5,8 @@ import {
   getCellDistance,
   getNeighbor,
   cellToId,
-  idToCell
+  idToCell,
+  getAllSquaresFromPoint
 } from "./grid/math";
 
 import {
@@ -36,7 +37,7 @@ export const getInitialCtx = canvasRef => {
 };
 
 export const drawPlayer = (ctx, player) => {
-  ctx.fillStyle = `rgb(255,255,255,1)`;
+  ctx.fillStyle = `rgb(50,50,50,1)`;
   ctx.fillText(
     "@",
     player.loc.col * CELL_WIDTH,
@@ -46,16 +47,16 @@ export const drawPlayer = (ctx, player) => {
 };
 
 export const drawPlayerHalo = (ctx, player, cellIds, cells) => {
-  // lighting halo (do elsewhere)
+  const localCellIds = Object.keys(getAllSquaresFromPoint(player.loc, 8));
   // from player location build halo of cell ids
   // get distance on all cells in halo
   // if they are open render light
-  cellIds.forEach(cellId => {
+  localCellIds.forEach(cellId => {
     const cell = cells[cellId];
-    if (cell.open) {
+    if (cell && cell.open) {
       const opacity =
-        ((getCellDistance(cellToId(player.loc), cellId) - 5) * -1) / 7;
-      ctx.fillStyle = `rgb(85,65,13,${opacity})`;
+        ((getCellDistance(cellToId(player.loc), cellId) - 8) * -1) / 7;
+      ctx.fillStyle = `rgb(230,180,59,${opacity})`;
       ctx.fillRect(
         cell.col * CELL_WIDTH,
         cell.row * CELL_HEIGHT,

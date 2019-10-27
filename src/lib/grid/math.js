@@ -126,6 +126,12 @@ export const getAllSquares = (s1, s2) => {
   return keyBy(squares, cellToId);
 };
 
+export const getAllSquaresFromPoint = (s1, radius) => {
+  const topLeft = { col: s1.col - radius, row: s1.row - radius };
+  const bottomRight = { col: s1.col + radius, row: s1.row + radius };
+  return getAllSquares(topLeft, bottomRight);
+};
+
 export const getMaxColumn = squares => {
   return Math.max(...map(squares, s => s.col));
 };
@@ -197,4 +203,34 @@ export const getUnselectedSquaresInBoundingBox = squares => {
   });
 
   return unselected;
+};
+
+export const getPoint = (x, y) => ({ x, y });
+
+export const diagonal_distance = (p0, p1) => {
+  var dx = p1.x - p0.x,
+    dy = p1.y - p0.y;
+  return Math.max(Math.abs(dx), Math.abs(dy));
+};
+
+export const round_point = p => {
+  return getPoint(Math.round(p.x), Math.round(p.y));
+};
+
+export const lerp_point = (p0, p1, t) => {
+  return getPoint(lerp(p0.x, p1.x, t), lerp(p0.y, p1.y, t));
+};
+
+export const lerp = (start, end, t) => {
+  return start + t * (end - start);
+};
+
+export const line = (p0, p1) => {
+  var points = [];
+  var N = diagonal_distance(p0, p1);
+  for (var step = 0; step <= N; step++) {
+    var t = N === 0 ? 0.0 : step / N;
+    points.push(round_point(lerp_point(p0, p1, t)));
+  }
+  return points;
 };
