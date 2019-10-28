@@ -29,7 +29,6 @@ let CELLS = getAllSquares(
 const CELL_IDS = Object.keys(CELLS);
 
 drunkardsWalk2(CELL_IDS, CELLS);
-
 categorizeCells(CELL_IDS, CELLS);
 
 let PLAYER = {
@@ -73,6 +72,8 @@ export default function App() {
       )
     );
 
+    categorizeCells(CELL_IDS, CELLS);
+
     PLAYER = {
       loc: _.find(CELLS, cell => cell.open)
     };
@@ -98,8 +99,6 @@ export default function App() {
     if (!CELLS[newLocId].open) return;
 
     PLAYER.loc = newLoc;
-
-    console.log(PLAYER.loc);
 
     renderGame(ctx);
   };

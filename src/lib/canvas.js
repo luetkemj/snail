@@ -57,7 +57,6 @@ export const drawPlayerHalo = (ctx, player, cellIds, cells) => {
   const litCellIds = [];
 
   // console.log(localBoundaryCellIds);
-  console.log(player.loc);
 
   localBoundaryCellIds.forEach(id => {
     const start = { x: player.loc.col, y: player.loc.row };
@@ -69,10 +68,12 @@ export const drawPlayerHalo = (ctx, player, cellIds, cells) => {
     _.each(theLine, point => {
       const cellId = pointToId(point);
       const cell = cells[cellId];
-      // console.log({ theLine, point, cellId, cell });
 
       if (cell && cell.type && cell.type === "floor") {
         litCellIds.push(cellId);
+      } else if (cell && cell.type && cell.type === "wall") {
+        litCellIds.push(cellId);
+        return false;
       } else {
         return false;
       }
@@ -82,23 +83,39 @@ export const drawPlayerHalo = (ctx, player, cellIds, cells) => {
     // cells[pointToId()]
   });
 
-  // console.log(litCellIds);
+  // console.log({ litCellIds });
 
   // from player location build halo of cell ids
   // get distance on all cells in halo
   // if they are open render light
   _.uniq(litCellIds).forEach(cellId => {
     const cell = cells[cellId];
-    if (cell && cell.open) {
+    if (cell) {
       const opacity =
         ((getCellDistance(cellToId(player.loc), cellId) - 8) * -1) / 7;
-      ctx.fillStyle = `rgb(230,180,59,${opacity})`;
+      // ctx.fillStyle = `rgb(230,180,59,${opacity})`;
+      ctx.fillStyle = `rgb(255,255,255,${opacity})`;
+      // ctx.fillStyle = `rgb(255,0,0,${opacity})`;
       ctx.fillRect(
         cell.col * CELL_WIDTH,
         cell.row * CELL_HEIGHT,
         CELL_WIDTH,
         CELL_HEIGHT
       );
+
+      if (cell.type === "wall") {
+        // ctx.fillStyle = `rgb(60,85,92, ${opacity})`;
+        // ctx.fillStyle = `rgb(135,157,163, ${opacity})`;
+        ctx.fillStyle = `rgb(67, 82, 68, ${opacity})`;
+        // ctx.font = `${TILE_SIZE}px serif`;
+        // ctx.fillText("#", cell.col * CELL_WIDTH, cell.row * CELL_HEIGHT);
+        ctx.fillRect(
+          cell.col * CELL_WIDTH,
+          cell.row * CELL_HEIGHT,
+          CELL_WIDTH,
+          CELL_HEIGHT
+        );
+      }
     }
   });
 };
@@ -111,8 +128,8 @@ export const drawMap = (ctx, cellIds, cells, player, debug = false) => {
   cellIds.forEach(cellId => {
     const cell = cells[cellId];
 
-    // ctx.fillStyle = cell.open ? `rgb(10,10,10)` : `rgb(100,100,100)`;
     ctx.fillStyle = cell.open ? `rgb(10,10,10)` : `rgb(10,10,10)`;
+    // ctx.fillStyle = cell.open ? `rgb(10,10,10)` : `rgb(11,11,11)`;
     ctx.fillRect(
       cell.col * CELL_WIDTH,
       cell.row * CELL_HEIGHT,
@@ -130,7 +147,7 @@ export const drawMap = (ctx, cellIds, cells, player, debug = false) => {
     // if (cell.type === "wall") {
     //   ctx.fillStyle = `rgb(255,255,255, 1)`;
     //   ctx.font = `${TILE_SIZE}px serif`;
-    //   ctx.fillText("☰", cell.col * CELL_WIDTH, cell.row * CELL_HEIGHT);
+    //   ctx.fillText("#", cell.col * CELL_WIDTH, cell.row * CELL_HEIGHT);
     // }
 
     if (debug) {
