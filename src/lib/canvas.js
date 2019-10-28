@@ -10,7 +10,8 @@ import {
   idToPoint,
   pointToId,
   getAllSquaresFromPoint,
-  line
+  line,
+  walkGrid
 } from "./grid/math";
 
 import {
@@ -61,7 +62,7 @@ export const drawPlayerHalo = (ctx, player, cellIds, cells) => {
   localBoundaryCellIds.forEach(id => {
     const start = { x: player.loc.col, y: player.loc.row };
     const end = idToPoint(id);
-    const theLine = line(start, end);
+    const theLine = walkGrid(start, end);
     // console.log({ start, end, theLine, player });
 
     // iterate over theLine!!
@@ -128,7 +129,10 @@ export const drawMap = (ctx, cellIds, cells, player, debug = false) => {
   cellIds.forEach(cellId => {
     const cell = cells[cellId];
 
-    ctx.fillStyle = cell.open ? `rgb(10,10,10)` : `rgb(10,10,10)`;
+    if (cell.type === "floor") ctx.fillStyle = `rgb(10,10,10)`;
+    else if (cell.type === "wall") ctx.fillStyle = `rgb(15,15,15)`;
+    else ctx.fillStyle = `rgb(12,12,12)`;
+    // ctx.fillStyle = cell.open ? `rgb(10,10,10)` : `rgb(15,15,15)`;
     // ctx.fillStyle = cell.open ? `rgb(10,10,10)` : `rgb(11,11,11)`;
     ctx.fillRect(
       cell.col * CELL_WIDTH,
