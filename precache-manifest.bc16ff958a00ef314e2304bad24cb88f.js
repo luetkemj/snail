@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "f2ca3621bc52c80c393d053e30cdc918",
+    "revision": "c6be902df04bea6394650623f3c3f541",
     "url": "/snail/index.html"
   },
   {
-    "revision": "784a276eba85e1386702",
+    "revision": "05e9c16002d77bdb01ea",
     "url": "/snail/static/css/main.ca0023f0.chunk.css"
   },
   {
@@ -12,8 +12,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/snail/static/js/2.2a34ea09.chunk.js"
   },
   {
-    "revision": "784a276eba85e1386702",
-    "url": "/snail/static/js/main.4cd2c2b6.chunk.js"
+    "revision": "05e9c16002d77bdb01ea",
+    "url": "/snail/static/js/main.a7946d2b.chunk.js"
   },
   {
     "revision": "09b36b301188ff00dddd",
