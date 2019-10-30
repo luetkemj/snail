@@ -16,6 +16,7 @@ import {
 import {
   drawMap,
   drawPlayer,
+  drawDijkstraMap,
   getInitialCtx,
   drunkardsWalk,
   drunkardsWalk2,
@@ -37,11 +38,14 @@ let PLAYER = {
 
 let ctx;
 
-const renderGame = ctx => {
+const renderGame = (ctx, settings) => {
   ctx.clearRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
   drawMap(ctx, CELL_IDS, CELLS, PLAYER);
   drawPlayerHalo(ctx, PLAYER, CELL_IDS, CELLS);
   drawPlayer(ctx, PLAYER);
+  if (settings.dijkstra === "on") {
+    drawDijkstraMap(ctx, PLAYER.loc, CELLS);
+  }
 };
 
 export default function App() {
@@ -78,7 +82,7 @@ export default function App() {
       loc: _.find(CELLS, cell => cell.open)
     };
 
-    renderGame(ctx);
+    renderGame(ctx, settings);
   };
 
   const handleSettingChange = (path, value) => {
@@ -89,7 +93,7 @@ export default function App() {
 
   useEffect(() => {
     ctx = getInitialCtx(canvasRef);
-    renderGame(ctx);
+    renderGame(ctx, settings);
   });
 
   const movePlayer = dir => {
@@ -100,7 +104,7 @@ export default function App() {
 
     PLAYER.loc = newLoc;
 
-    renderGame(ctx);
+    renderGame(ctx, settings);
   };
 
   const handleKeyDown = ({ key }) => {
@@ -155,15 +159,6 @@ export default function App() {
             handleSettingChange("iterations", e.target.value);
           }}
         />
-        {/* <label htmlFor="startLocation">Starting Location:</label>
-        <input
-          type="text"
-          name="startLocation"
-          value={settings.startingLocation}
-          onChange={e => {
-            handleSettingChange("startingLocation", e.target.value);
-          }}
-        /> */}
         <label htmlFor="randomStart">Random Starting Location</label>
         <input
           type="checkbox"
@@ -173,6 +168,18 @@ export default function App() {
             handleSettingChange(
               "randomStartingLocation",
               settings.randomStartingLocation === "on" ? "" : "on"
+            );
+          }}
+        />
+        <label htmlFor="randomStart">Dijkstra Map</label>
+        <input
+          type="checkbox"
+          name="dijkstra"
+          checked={settings.dijkstra}
+          onChange={e => {
+            handleSettingChange(
+              "dijkstra",
+              settings.dijkstra === "on" ? "" : "on"
             );
           }}
         />

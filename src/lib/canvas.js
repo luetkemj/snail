@@ -43,6 +43,7 @@ export const getInitialCtx = canvasRef => {
 
 export const drawPlayer = (ctx, player) => {
   ctx.fillStyle = `rgb(50,50,50,1)`;
+  ctx.font = `${TILE_SIZE}px serif`;
   ctx.fillText(
     "@",
     player.loc.col * CELL_WIDTH,
@@ -57,13 +58,10 @@ export const drawPlayerHalo = (ctx, player, cellIds, cells) => {
   const localBoundaryCellIds = getBoundary(localCellIds);
   const litCellIds = [];
 
-  // console.log(localBoundaryCellIds);
-
   localBoundaryCellIds.forEach(id => {
     const start = { x: player.loc.col, y: player.loc.row };
     const end = idToPoint(id);
     const theLine = walkGrid(start, end);
-    // console.log({ start, end, theLine, player });
 
     // iterate over theLine!!
     _.each(theLine, point => {
@@ -79,12 +77,7 @@ export const drawPlayerHalo = (ctx, player, cellIds, cells) => {
         return false;
       }
     });
-    // from start if it's floor light
-    // it it's wall bail on all other cells
-    // cells[pointToId()]
   });
-
-  // console.log({ litCellIds });
 
   // from player location build halo of cell ids
   // get distance on all cells in halo
@@ -94,9 +87,7 @@ export const drawPlayerHalo = (ctx, player, cellIds, cells) => {
     if (cell) {
       const opacity =
         ((getCellDistance(cellToId(player.loc), cellId) - 8) * -1) / 7;
-      // ctx.fillStyle = `rgb(230,180,59,${opacity})`;
       ctx.fillStyle = `rgb(255,255,255,${opacity})`;
-      // ctx.fillStyle = `rgb(255,0,0,${opacity})`;
       ctx.fillRect(
         cell.col * CELL_WIDTH,
         cell.row * CELL_HEIGHT,
@@ -105,11 +96,7 @@ export const drawPlayerHalo = (ctx, player, cellIds, cells) => {
       );
 
       if (cell.type === "wall") {
-        // ctx.fillStyle = `rgb(60,85,92, ${opacity})`;
-        // ctx.fillStyle = `rgb(135,157,163, ${opacity})`;
         ctx.fillStyle = `rgb(67, 82, 68, ${opacity})`;
-        // ctx.font = `${TILE_SIZE}px serif`;
-        // ctx.fillText("#", cell.col * CELL_WIDTH, cell.row * CELL_HEIGHT);
         ctx.fillRect(
           cell.col * CELL_WIDTH,
           cell.row * CELL_HEIGHT,
@@ -132,8 +119,6 @@ export const drawMap = (ctx, cellIds, cells, player, debug = false) => {
     if (cell.type === "floor") ctx.fillStyle = `rgb(10,10,10)`;
     else if (cell.type === "wall") ctx.fillStyle = `rgb(15,15,15)`;
     else ctx.fillStyle = `rgb(12,12,12)`;
-    // ctx.fillStyle = cell.open ? `rgb(10,10,10)` : `rgb(15,15,15)`;
-    // ctx.fillStyle = cell.open ? `rgb(10,10,10)` : `rgb(11,11,11)`;
     ctx.fillRect(
       cell.col * CELL_WIDTH,
       cell.row * CELL_HEIGHT,
@@ -159,6 +144,26 @@ export const drawMap = (ctx, cellIds, cells, player, debug = false) => {
       ctx.font = "8px serif";
       ctx.fillText(cellId, cell.col * CELL_WIDTH, cell.row * CELL_HEIGHT);
     }
+  });
+
+  // const dMap = dijkstra(player.loc, cells);
+
+  // Object.keys(dMap).forEach(id => {
+  //   const c = idToCell(id);
+
+  //   ctx.fillStyle = `rgb(200,0,0, 1)`;
+  //   ctx.font = "12px serif";
+  //   ctx.fillText(dMap[id], c.col * CELL_WIDTH, c.row * CELL_HEIGHT);
+  // });
+};
+
+export const drawDijkstraMap = (ctx, goal, cells) => {
+  const dMap = dijkstra(goal, cells);
+  Object.keys(dMap).forEach(id => {
+    const c = idToCell(id);
+    ctx.fillStyle = `rgb(200,0,0, 1)`;
+    ctx.font = "12px serif";
+    ctx.fillText(dMap[id], c.col * CELL_WIDTH, c.row * CELL_HEIGHT);
   });
 };
 
@@ -260,10 +265,38 @@ export const categorizeCells = (CELL_IDS, CELLS) => {
   CELL_IDS.forEach(id => {
     const cell = CELLS[id];
     if (!cell.type && isWall(CELLS, id)) {
-      // console.log("WALL!");
       cell.type = "wall";
       WALL_CELL_IDS.push(id);
       return;
     }
   });
+};
+
+const dijkstra = (start, cells) => {
+  const startCell = start;
+  const startId = cellToId(startCell);
+  const frontier = [startId];
+  const distance = { [startId]: 0 };
+
+  while (frontier.length) {
+    const current = frontier.shift();
+    const neighbors = [
+      cellToId(getNeighbor(idToCell(current), "N")),
+      cellToId(getNeighbor(idToCell(current), "E")),
+      cellToId(getNeighbor(idToCell(current), "S")),
+      cellToId(getNeighbor(idToCell(current), "W"))
+    ];
+    neighbors.forEach(neighborId => {
+      // const neighborCellId = cellToId(neighbor);
+      if (!distance[neighborId]) {
+        if (cells[neighborId] && cells[neighborId].type === "floor") {
+          distance[neighborId] = distance[current] + 1;
+          frontier.push(neighborId);
+        }
+      }
+    });
+  }
+
+  distance[startId] = 0;
+  return distance;
 };

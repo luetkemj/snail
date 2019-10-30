@@ -20,19 +20,19 @@ export const getCellDistance = (cellId1, cellId2) => {
 export const getNeighbor = (s, dir) => {
   switch (dir) {
     case "N":
-      return { ...s, row: s.row - 1 };
+      return { col: s.col, row: s.row - 1 };
     case "NE":
       return { col: s.col + 1, row: s.row - 1 };
     case "E":
-      return { ...s, col: s.col + 1 };
+      return { row: s.row, col: s.col + 1 };
     case "SE":
       return { col: s.col + 1, row: s.row + 1 };
     case "S":
-      return { ...s, row: s.row + 1 };
+      return { col: s.col, row: s.row + 1 };
     case "SW":
       return { col: s.col - 1, row: s.row + 1 };
     case "W":
-      return { ...s, col: s.col - 1 };
+      return { row: s.row, col: s.col - 1 };
     case "NW":
       return { col: s.col - 1, row: s.row - 1 };
 
