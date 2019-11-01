@@ -48,6 +48,21 @@ export const drawPlayer = (ctx, player) => {
   );
 };
 
+export const drawMonsters = (ctx, monsters) => {
+  console.log(monsters);
+  monsters.forEach(monster => {
+    // ctx.fillStyle = `rgb(0,0,0,1)`;
+    ctx.fillStyle = `rgb(0,0,0,1)`;
+    ctx.font = `${TILE_SIZE}px serif`;
+    ctx.fillText(
+      "g",
+      monster.loc.col * CELL_WIDTH,
+      monster.loc.row * CELL_HEIGHT,
+      CELL_WIDTH
+    );
+  });
+};
+
 export const drawPlayerHalo = (ctx, player, cellIds, cells) => {
   const localCells = getAllSquaresFromPoint(player.loc, 8);
   const localCellIds = Object.keys(localCells);

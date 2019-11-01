@@ -16,6 +16,7 @@ import {
 import {
   drawMap,
   drawPlayer,
+  drawMonsters,
   drawDijkstraMap,
   getInitialCtx,
   drunkardsWalk,
@@ -32,20 +33,37 @@ const CELL_IDS = Object.keys(CELLS);
 drunkardsWalk2(CELL_IDS, CELLS);
 categorizeCells(CELL_IDS, CELLS);
 
+const openCells = _.filter(CELLS, cell => cell.open);
+
 let PLAYER = {
-  loc: _.find(CELLS, cell => cell.open)
+  loc: openCells[0]
 };
+
+let MONSTERS = [
+  { loc: _.sample(openCells) },
+  { loc: _.sample(openCells) },
+  { loc: _.sample(openCells) },
+  { loc: _.sample(openCells) }
+];
 
 let ctx;
 
-const renderGame = (ctx, settings) => {
+const renderGame = settings => {
   ctx.clearRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
   drawMap(ctx, CELL_IDS, CELLS, PLAYER);
   drawPlayerHalo(ctx, PLAYER, CELL_IDS, CELLS);
+  drawMonsters(ctx, MONSTERS);
   drawPlayer(ctx, PLAYER);
 
   if (settings.dijkstra === "on") {
-    drawDijkstraMap(ctx, [PLAYER.loc], CELLS, [0, 0, 0, 0, 0, 0]);
+    drawDijkstraMap(ctx, [PLAYER.loc, ...settings.bGoals], CELLS, [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]);
   }
 };
 
@@ -55,8 +73,26 @@ export default function App() {
     algorithm: "dw",
     iterations: 30,
     startingLocation: "30,20",
-    randomStartingLocation: "on"
+    randomStartingLocation: "on",
+    dijkstra: "",
+    goals: 1,
+    bGoals: []
   });
+
+  useEffect(() => {
+    ctx = getInitialCtx(canvasRef);
+    renderGame(settings);
+  });
+
+  const handleSettingChange = (path, value) => {
+    const newSettings = { ...settings };
+    newSettings[path] = value;
+    setSettings(newSettings);
+  };
+
+  const nextTurn = () => {
+    renderGame(settings);
+  };
 
   const rebuild = () => {
     CELLS = getAllSquares(
@@ -83,19 +119,20 @@ export default function App() {
       loc: _.find(CELLS, cell => cell.open)
     };
 
-    renderGame(ctx, settings);
-  };
+    const floors = _.filter(CELLS, cell => cell.type === "floor");
+    const bGoals = [];
 
-  const handleSettingChange = (path, value) => {
-    const newSettings = { ...settings };
-    newSettings[path] = value;
-    setSettings(newSettings);
-  };
+    _.times(settings.goals, () => {
+      bGoals.push(_.sample(floors));
+    });
 
-  useEffect(() => {
-    ctx = getInitialCtx(canvasRef);
-    renderGame(ctx, settings);
-  });
+    setSettings({
+      ...settings,
+      bGoals
+    });
+
+    renderGame(settings);
+  };
 
   const movePlayer = dir => {
     const newLoc = getNeighbor(PLAYER.loc, dir);
@@ -105,7 +142,7 @@ export default function App() {
 
     PLAYER.loc = newLoc;
 
-    renderGame(ctx, settings);
+    nextTurn();
   };
 
   const handleKeyDown = ({ key }) => {
@@ -182,6 +219,17 @@ export default function App() {
               "dijkstra",
               settings.dijkstra === "on" ? "" : "on"
             );
+          }}
+        />
+        <label htmlFor="goals">Dijkstra Goals:</label>
+        <input
+          name="goals"
+          type="number"
+          min="1"
+          max="100"
+          value={settings.goals}
+          onChange={e => {
+            handleSettingChange("goals", e.target.value);
           }}
         />
         <button onClick={rebuild}>Rebuild Map</button>
