@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import useEventListener from "@use-it/event-listener";
-import { cellToId, getAllSquares, getNeighbor } from "./lib/grid/math";
+import { cellToId, getNeighbor } from "./lib/grid/math";
 import { observeBoundaries, drawPlayerHalo } from "./lib/canvas";
 import _ from "lodash";
 
@@ -22,7 +22,6 @@ import {
 } from "./lib/canvas";
 
 const MAP_ID = 1;
-
 createMap(MAP_ID);
 
 drunkardsWalk2();
@@ -44,22 +43,14 @@ let MONSTERS = [
 let ctx;
 
 const renderGame = settings => {
-  const { cells, cellIds } = getMap(MAP_ID);
   ctx.clearRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
-  drawMap(ctx, cellIds, cells, PLAYER);
-  drawPlayerHalo(ctx, PLAYER, cellIds, cells);
+  drawMap(ctx, PLAYER);
+  drawPlayerHalo(ctx, PLAYER);
   drawMonsters(ctx, MONSTERS);
   drawPlayer(ctx, PLAYER);
 
   if (settings.dijkstra === "on") {
-    drawDijkstraMap(ctx, [PLAYER.loc, ...settings.bGoals], cells, [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    ]);
+    drawDijkstraMap(ctx, [PLAYER.loc, ...settings.bGoals], [0, 0, 0, 0, 0, 0]);
   }
 };
 

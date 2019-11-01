@@ -64,7 +64,8 @@ export const drawMonsters = (ctx, monsters) => {
   });
 };
 
-export const drawPlayerHalo = (ctx, player, cellIds, cells) => {
+export const drawPlayerHalo = (ctx, player) => {
+  const { cells } = getCurrentMap();
   const localCells = getAllSquaresFromPoint(player.loc, 8);
   const localCellIds = Object.keys(localCells);
   const localBoundaryCellIds = getBoundary(localCellIds);
@@ -124,7 +125,9 @@ export const drawPlayerHalo = (ctx, player, cellIds, cells) => {
 // cells { id: {col: 0, row: 0} }
 // player { loc: {col: 0, row: 0} }
 // debug boolean
-export const drawMap = (ctx, cellIds, cells, player, debug = false) => {
+export const drawMap = (ctx, player, debug = false) => {
+  const { cellIds, cells } = getCurrentMap();
+
   cellIds.forEach(cellId => {
     const cell = cells[cellId];
 
@@ -159,7 +162,8 @@ export const drawMap = (ctx, cellIds, cells, player, debug = false) => {
   });
 };
 
-export const drawDijkstraMap = (ctx, goals, cells, weights) => {
+export const drawDijkstraMap = (ctx, goals, weights) => {
+  const { cells } = getCurrentMap();
   const dMap = dijkstra(goals, cells, weights);
   Object.keys(dMap).forEach(id => {
     const c = idToCell(id);
