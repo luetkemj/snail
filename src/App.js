@@ -4,14 +4,11 @@ import { cellToId, getAllSquares, getNeighbor } from "./lib/grid/math";
 import { observeBoundaries, drawPlayerHalo } from "./lib/canvas";
 import _ from "lodash";
 
+import { createMap, getMap } from "./data/game.data";
+
 import "./App.css";
 
-import {
-  COLUMNS,
-  ROWS,
-  MAP_HEIGHT,
-  MAP_WIDTH
-} from "./constants/game.constants";
+import { MAP_HEIGHT, MAP_WIDTH } from "./constants/game.constants";
 
 import {
   drawMap,
@@ -24,16 +21,14 @@ import {
   categorizeCells
 } from "./lib/canvas";
 
-let CELLS = getAllSquares(
-  { col: 0, row: 0, open: false },
-  { col: COLUMNS, row: ROWS }
-);
-const CELL_IDS = Object.keys(CELLS);
+const MAP_ID = 1;
 
-drunkardsWalk2(CELL_IDS, CELLS);
-categorizeCells(CELL_IDS, CELLS);
+createMap(MAP_ID);
 
-const openCells = _.filter(CELLS, cell => cell.open);
+drunkardsWalk2();
+categorizeCells();
+
+const openCells = _.filter(getMap(MAP_ID).cells, cell => cell.open);
 
 let PLAYER = {
   loc: openCells[0]
@@ -49,14 +44,15 @@ let MONSTERS = [
 let ctx;
 
 const renderGame = settings => {
+  const { cells, cellIds } = getMap(MAP_ID);
   ctx.clearRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
-  drawMap(ctx, CELL_IDS, CELLS, PLAYER);
-  drawPlayerHalo(ctx, PLAYER, CELL_IDS, CELLS);
+  drawMap(ctx, cellIds, cells, PLAYER);
+  drawPlayerHalo(ctx, PLAYER, cellIds, cells);
   drawMonsters(ctx, MONSTERS);
   drawPlayer(ctx, PLAYER);
 
   if (settings.dijkstra === "on") {
-    drawDijkstraMap(ctx, [PLAYER.loc, ...settings.bGoals], CELLS, [
+    drawDijkstraMap(ctx, [PLAYER.loc, ...settings.bGoals], cells, [
       0,
       0,
       0,
@@ -95,10 +91,8 @@ export default function App() {
   };
 
   const rebuild = () => {
-    CELLS = getAllSquares(
-      { col: 0, row: 0, open: false },
-      { col: COLUMNS, row: ROWS }
-    );
+    createMap(1);
+    const { cells } = getMap(MAP_ID);
 
     const algorithms = {
       dw: drunkardsWalk,
@@ -106,20 +100,16 @@ export default function App() {
     };
 
     _.times(settings.iterations, () =>
-      algorithms[settings.algorithm](
-        CELL_IDS,
-        CELLS,
-        settings.randomStartingLocation === "on"
-      )
+      algorithms[settings.algorithm](settings.randomStartingLocation === "on")
     );
 
-    categorizeCells(CELL_IDS, CELLS);
+    categorizeCells();
 
     PLAYER = {
-      loc: _.find(CELLS, cell => cell.open)
+      loc: _.find(cells, cell => cell.open)
     };
 
-    const floors = _.filter(CELLS, cell => cell.type === "floor");
+    const floors = _.filter(cells, cell => cell.type === "floor");
     const bGoals = [];
 
     _.times(settings.goals, () => {
@@ -135,10 +125,11 @@ export default function App() {
   };
 
   const movePlayer = dir => {
+    const { cells } = getMap(MAP_ID);
     const newLoc = getNeighbor(PLAYER.loc, dir);
     const newLocId = cellToId(newLoc);
     if (!observeBoundaries(newLocId)) return;
-    if (!CELLS[newLocId].open) return;
+    if (!cells[newLocId].open) return;
 
     PLAYER.loc = newLoc;
 

@@ -1,5 +1,7 @@
 import _ from "lodash";
 
+import { getCurrentMap } from "../data/game.data";
+
 import {
   getBoundary,
   getCellDistance,
@@ -51,7 +53,6 @@ export const drawPlayer = (ctx, player) => {
 export const drawMonsters = (ctx, monsters) => {
   console.log(monsters);
   monsters.forEach(monster => {
-    // ctx.fillStyle = `rgb(0,0,0,1)`;
     ctx.fillStyle = `rgb(0,0,0,1)`;
     ctx.font = `${TILE_SIZE}px serif`;
     ctx.fillText(
@@ -168,7 +169,8 @@ export const drawDijkstraMap = (ctx, goals, cells, weights) => {
   });
 };
 
-export const drunkardsWalk = (cellIds, cells, randomStart = false) => {
+export const drunkardsWalk = (randomStart = false) => {
+  const { cells, cellIds } = getCurrentMap();
   const dig = cell => (cell.open = true);
   const directions = ["N", "E", "S", "W"];
 
@@ -197,7 +199,9 @@ export const drunkardsWalk = (cellIds, cells, randomStart = false) => {
   _.times(2500, digger);
 };
 
-export const drunkardsWalk2 = (cellIds, cells, randomStart = false) => {
+export const drunkardsWalk2 = (randomStart = false) => {
+  const { cells, cellIds } = getCurrentMap();
+
   const dig = cell => (cell.open = true);
   const directions = ["N", "E", "S", "W"];
 
@@ -248,14 +252,16 @@ export const isWall = (CELLS, cellId) => {
   return false;
 };
 
-export const categorizeCells = (CELL_IDS, CELLS) => {
+export const categorizeCells = () => {
+  const { cells, cellIds } = getCurrentMap();
+
   const FLOOR_CELL_IDS = [];
   const WALL_CELL_IDS = [];
   const ROCK_CELL_IDS = [];
 
   // mark floors
-  CELL_IDS.forEach(id => {
-    const cell = CELLS[id];
+  cellIds.forEach(id => {
+    const cell = cells[id];
     if (cell.open) {
       cell.type = "floor";
       FLOOR_CELL_IDS.push(id);
@@ -263,9 +269,9 @@ export const categorizeCells = (CELL_IDS, CELLS) => {
     }
   });
 
-  CELL_IDS.forEach(id => {
-    const cell = CELLS[id];
-    if (!cell.type && isWall(CELLS, id)) {
+  cellIds.forEach(id => {
+    const cell = cells[id];
+    if (!cell.type && isWall(cells, id)) {
       cell.type = "wall";
       WALL_CELL_IDS.push(id);
       return;
