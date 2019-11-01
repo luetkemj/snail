@@ -157,8 +157,8 @@ export const drawMap = (ctx, cellIds, cells, player, debug = false) => {
   // });
 };
 
-export const drawDijkstraMap = (ctx, goal, cells) => {
-  const dMap = dijkstra(goal, cells);
+export const drawDijkstraMap = (ctx, goal, cells, bGoals) => {
+  const dMap = dijkstra(goal, cells, bGoals);
   Object.keys(dMap).forEach(id => {
     const c = idToCell(id);
     ctx.fillStyle = `rgb(200,0,0, 1)`;
@@ -272,11 +272,18 @@ export const categorizeCells = (CELL_IDS, CELLS) => {
   });
 };
 
-const dijkstra = (start, cells) => {
+const dijkstra = (start, cells, extraStarts) => {
+  const bGoals = extraStarts.map(cellToId);
   const startCell = start;
   const startId = cellToId(startCell);
-  const frontier = [startId];
-  const distance = { [startId]: 0 };
+  const frontier = [startId, ...bGoals];
+  // const distance = { [startId]: 0 };
+  const distance = frontier.reduce((acc, val) => {
+    acc[val] = 0;
+    return acc;
+  }, {});
+
+  console.log({ bGoals, startCell, startId, frontier, distance });
 
   while (frontier.length) {
     const current = frontier.shift();
