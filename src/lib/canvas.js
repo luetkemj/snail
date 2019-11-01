@@ -1,7 +1,6 @@
 import _ from "lodash";
 
 import {
-  // getAllSquares,
   getBoundary,
   getCellDistance,
   getNeighbor,
@@ -10,7 +9,6 @@ import {
   idToPoint,
   pointToId,
   getAllSquaresFromPoint,
-  line,
   walkGrid
 } from "./grid/math";
 
@@ -20,8 +18,6 @@ import {
   CELL_HEIGHT,
   COLUMNS,
   ROWS
-  // MAP_HEIGHT,
-  // MAP_WIDTH
 } from "../constants/game.constants";
 
 export const observeBoundaries = id => {
@@ -145,20 +141,10 @@ export const drawMap = (ctx, cellIds, cells, player, debug = false) => {
       ctx.fillText(cellId, cell.col * CELL_WIDTH, cell.row * CELL_HEIGHT);
     }
   });
-
-  // const dMap = dijkstra(player.loc, cells);
-
-  // Object.keys(dMap).forEach(id => {
-  //   const c = idToCell(id);
-
-  //   ctx.fillStyle = `rgb(200,0,0, 1)`;
-  //   ctx.font = "12px serif";
-  //   ctx.fillText(dMap[id], c.col * CELL_WIDTH, c.row * CELL_HEIGHT);
-  // });
 };
 
-export const drawDijkstraMap = (ctx, goal, cells, bGoals) => {
-  const dMap = dijkstra(goal, cells, bGoals);
+export const drawDijkstraMap = (ctx, goals, cells, weights) => {
+  const dMap = dijkstra(goals, cells, weights);
   Object.keys(dMap).forEach(id => {
     const c = idToCell(id);
     ctx.fillStyle = `rgb(200,0,0, 1)`;
@@ -272,18 +258,12 @@ export const categorizeCells = (CELL_IDS, CELLS) => {
   });
 };
 
-const dijkstra = (start, cells, extraStarts) => {
-  const bGoals = extraStarts.map(cellToId);
-  const startCell = start;
-  const startId = cellToId(startCell);
-  const frontier = [startId, ...bGoals];
-  // const distance = { [startId]: 0 };
-  const distance = frontier.reduce((acc, val) => {
-    acc[val] = 0;
+const dijkstra = (goals, cells, weights = []) => {
+  const frontier = goals.map(cellToId);
+  const distance = frontier.reduce((acc, val, idx) => {
+    acc[val] = weights[idx] || 0;
     return acc;
   }, {});
-
-  console.log({ bGoals, startCell, startId, frontier, distance });
 
   while (frontier.length) {
     const current = frontier.shift();
@@ -294,7 +274,6 @@ const dijkstra = (start, cells, extraStarts) => {
       cellToId(getNeighbor(idToCell(current), "W"))
     ];
     neighbors.forEach(neighborId => {
-      // const neighborCellId = cellToId(neighbor);
       if (!distance[neighborId]) {
         if (cells[neighborId] && cells[neighborId].type === "floor") {
           distance[neighborId] = distance[current] + 1;
@@ -304,6 +283,11 @@ const dijkstra = (start, cells, extraStarts) => {
     });
   }
 
-  distance[startId] = 0;
+  // normalize goals to their weights or 0
+  goals.forEach((goal, idx) => {
+    const id = cellToId(goal);
+    distance[id] = weights[idx] || 0;
+  });
+
   return distance;
 };

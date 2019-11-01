@@ -43,10 +43,9 @@ const renderGame = (ctx, settings) => {
   drawMap(ctx, CELL_IDS, CELLS, PLAYER);
   drawPlayerHalo(ctx, PLAYER, CELL_IDS, CELLS);
   drawPlayer(ctx, PLAYER);
-  const floors = _.filter(CELLS, cell => cell.type === "floor");
 
   if (settings.dijkstra === "on") {
-    drawDijkstraMap(ctx, PLAYER.loc, CELLS, [floors[20]]);
+    drawDijkstraMap(ctx, [PLAYER.loc], CELLS, [0, 0, 0, 0, 0, 0]);
   }
 };
 
